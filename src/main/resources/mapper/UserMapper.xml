@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    UserMapper.xml —— SQL 映射文件
+    作用：把 UserMapper.java 里的方法和 SQL 语句关联起来
+    会用在：MyBatis-Plus 执行 SQL 时加载这个文件
+    位置：src/main/resources/mapper/UserMapper.xml
+         （和 application.yml 里的 mapper-locations 一致）
+-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    namespace 必须和 Mapper 接口的全路径一致
+    MyBatis 根据 namespace 找到对应的 Mapper
+-->
+<mapper namespace="com.shop.mapper.UserMapper">
+
+    <!--
+        根据用户名查询用户
+        id 对应 UserMapper.java 里的方法名 findByUsername
+        parameterType 参数类型
+        resultType 返回类型（用了 type-aliases-package，所以可以简写）
+
+        SQL 解释：
+        SELECT * FROM user WHERE username = #{username}
+        #{username} 是参数占位符，MyBatis 会自动处理防 SQL 注入
+    -->
+    <select id="findByUsername" parameterType="string" resultType="User">
+        SELECT * FROM `user` WHERE username = #{username}
+    </select>
+
+</mapper>

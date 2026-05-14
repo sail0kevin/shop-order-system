@@ -1,0 +1,64 @@
+version: '3.8'
+
+# ================================================
+# Docker Compose —— 一键启动所有服务
+# 使用：docker-compose up -d
+# 访问：http://localhost:8080/doc.html
+# ================================================
+
+services:
+
+  # ---------- MySQL 数据库 ----------
+  mysql:
+    image: mysql:8.0
+    container_name: shop-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: shop
+    ports:
+      - "3307:3306"   # 映射到 3307 避免和本地 MySQL 冲突
+    volumes:
+      - mysql-data:/var/lib/mysql           # 持久化数据
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql  # 自动初始化
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root -p123456
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ---------- Redis 缓存 ----------
+  redis:
+    image: redis:7-alpine
+    container_name: shop-redis
+    ports:
+      - "6380:6379"   # 映射到 6380 避免和本地 Redis 冲突
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ---------- Spring Boot 应用 ----------
+  app:
+    build: .
+    container_name: shop-app
+    ports:
+      - "8080:8080"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_PASSWORD: 123456
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+  redis-data:
