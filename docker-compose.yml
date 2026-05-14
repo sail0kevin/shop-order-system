@@ -19,7 +19,7 @@ services:
       - "3307:3306"   # 映射到 3307 避免和本地 MySQL 冲突
     volumes:
       - mysql-data:/var/lib/mysql           # 持久化数据
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql  # 自动初始化
+      - ./backend/sql/init.sql:/docker-entrypoint-initdb.d/init.sql  # 自动初始化
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u root -p123456
@@ -43,7 +43,7 @@ services:
 
   # ---------- Spring Boot 应用 ----------
   app:
-    build: .
+    build: ./backend
     container_name: shop-app
     ports:
       - "8080:8080"

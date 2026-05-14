@@ -1,0 +1,53 @@
+# ================================================
+# application.yml —— 项目的"设置面板"
+# 作用：配置数据库、Redis、端口等所有参数
+# 会用在：项目启动时 Spring Boot 自动读取
+# 位置：src/main/resources/application.yml
+# ================================================
+
+server:
+  port: 8080        # 项目启动端口，浏览器访问 http://localhost:8080
+
+spring:
+  # ---------- 数据源配置（怎么连数据库） ----------
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/shop?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    # ${MYSQL_HOST:localhost} — Docker 部署传入 MYSQL_HOST=mysql，默认 localhost
+    username: root
+    password: ${MYSQL_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ---------- Redis 配置（怎么连 Redis） ----------
+  redis:
+    host: ${REDIS_HOST:localhost}          # Docker 部署传入 REDIS_HOST=redis
+    port: ${REDIS_PORT:6379}
+    timeout: 5000
+
+# ---------- MyBatis-Plus 配置 ----------
+mybatis-plus:
+  # mapper.xml 文件位置 —— SQL 写在这些 XML 里
+  mapper-locations: classpath:mapper/*.xml
+  # 实体类所在包，这样在 XML 里写 resultType 不用写全路径
+  type-aliases-package: com.shop.entity
+  configuration:
+    # 开启驼峰命名映射
+    # 效果：数据库字段 user_name 自动映射到 Java 属性 userName
+    map-underscore-to-camel-case: true
+    # 控制台打印 SQL（开发时方便调试，上线建议关掉）
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# ---------- Knife4j / Swagger 配置 ----------
+knife4j:
+  enable: true               # 开启 Knife4j 增强功能
+springfox:
+  documentation:
+    enabled: true            # 开启接口文档
+
+# ---------- 项目自定义配置 ----------
+shop:
+  jwt:
+    # JWT 密钥——用来签名 Token，不能泄露
+    # 实际项目应该放在环境变量或配置中心，不要硬编码
+    secret: shop-order-system-secret-key-2026
+    # Token 过期时间（毫秒），24 小时
+    expire: 86400000

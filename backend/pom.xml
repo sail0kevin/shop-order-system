@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+        ================================================
+        POM 文件 —— 项目的"购物清单"
+        作用：告诉 Maven 这个项目需要哪些库、怎么打包
+        会用在：第一次 mvn install 或 IDE 打开时自动下载
+        ================================================
+    -->
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        parent: 继承 Spring Boot 官方配置
+        好处：不用自己管各个依赖的版本，Spring Boot 帮你配好了
+        2.7.18 是 Spring Boot 2.x 最后一个版本，稳定
+        如果用 JDK 17+ 可以升级到 3.x
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.18</version>
+        <relativePath/>
+    </parent>
+
+    <!-- ========== 项目基本信息 ========== -->
+    <groupId>com.shop</groupId>          <!-- 公司域名倒写，唯一标识 -->
+    <artifactId>shop-order-system</artifactId>  <!-- 项目名 -->
+    <version>1.0.0</version>            <!-- 版本号 -->
+    <name>shop-order-system</name>
+    <description>商城订单系统 —— 包含用户、商品、购物车、订单模块</description>
+
+    <properties>
+        <!-- 告诉 Maven 用 Java 11 编译，必须和你的 JDK 版本一致 -->
+        <java.version>11</java.version>
+    </properties>
+
+    <!--
+        ========== 依赖列表 ==========
+        每个 dependency 就是项目要用的一个库
+    -->
+    <dependencies>
+        <!--
+            1. spring-boot-starter-web
+            作用：Spring Boot 的 Web 核心，包含：
+                - Spring MVC（写 @RestController 用的）
+                - 内嵌 Tomcat（不用单独装服务器）
+                - Jackson（JSON 转换）
+            会用在：所有 Controller 类
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!--
+            2. spring-boot-starter-data-redis
+            作用：Redis 客户端，用来连接 Redis 服务器
+            会用在：
+                - 购物车功能（存在 Redis 里）
+                - 热门商品缓存
+                - 以后还可以做 Session 共享
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!--
+            3. Spring Security Crypto（密码加密）
+            作用：提供 BCryptPasswordEncoder，用于密码加密和验证
+            只用了加密功能，不会触发 Spring Security 的拦截器
+            会用在：注册时加密密码、登录时验证密码
+        -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
+        <!--
+            4. spring-boot-starter-validation
+            作用：参数校验，比如"用户名不能为空"
+            会用在：Controller 接收请求参数时校验格式
+            改进：如果不用 @Valid 校验，可以去掉
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!--
+            5. MyBatis-Plus
+            作用：操作数据库的框架，比 MyBatis 省很多代码
+            特点：单表 CRUD 不用写 SQL，MyBatis-Plus 自动生成
+            会用在：所有 Mapper 接口
+            改进：复杂查询还是需要手写 SQL
+        -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.5</version>
+        </dependency>
+
+        <!--
+            6. MySQL 驱动
+            作用：让 Java 能连上 MySQL 数据库
+            会用在：项目启动时建立数据库连接
+            注意：scope=运行时，编译期不需要
+        -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!--
+            7. JWT（JSON Web Token）
+            作用：生成和验证登录令牌
+            登录成功 -> 生成一个 JWT 字符串返回给前端
+            下次请求带着 JWT -> 后端验证是不是有效
+            会用在：登录接口、JWT拦截器
+            改进：可以用 jjwt 替代，功能一样
+        -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
+        <!--
+            8. Knife4j（Swagger 增强版）
+            作用：自动生成接口文档，方便调试
+            地址：http://localhost:8080/doc.html
+            会用在：开发时调试接口
+            改进：上线前应该关闭，用 @Profile("dev") 限制
+        -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
+        <!--
+            9. Lombok
+            作用：用注解省掉 getter/setter/构造方法 等重复代码
+            示例：@Data 注解 = 自动生成 getter + setter + toString
+            会用在：所有实体类、DTO
+            注意：IDE 必须装 Lombok 插件，不然会报错
+        -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!--
+            10. 测试
+            作用：Spring Boot 自带的测试框架
+            会用在：写单元测试时
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!--
+        ========== 构建配置 ==========
+        告诉 Maven 如何打包
+    -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <!-- 打包时排除 Lombok，因为它只在编译期需要 -->
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
